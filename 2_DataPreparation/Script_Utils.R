@@ -241,5 +241,63 @@ hgb_class <- function(df){
 
 
 
+###Function to calculate the GFR of the patients
+###It receives the creatinene window dataframe and
+##returns a dataframe with the GFR column 
+##GFR FORMULA:
+##Female, cr <= 0.7 = 144 * (cr / 0.7)^(-0.329) * 0.993^(age)
+##Female, cr > 0.7 = 144 * (cr / 0.7)^(-1.209) * 0.993^(age)
+##Male, cr <= 0.9 = 141 * (cr / 0.9)^(-0.411) * 0.993^(age)
+##Male, cr > 0.9 = 141 * (cr / 0.9)^(-1.209) * 0.993^(age)
+
+##If the patient race is black, multiply the formula by 1.159
+
+calculate_gfr <- function(df){
+  df$GFR <- 0
+  for (i in 1:nrow(df)){
+    cr <- df[i,"creatinine_value"]
+    sex <- df[i,"gender"]
+    race <- df[i,"race"]
+    age <- df[i,"age"]
+    
+    
+    if(sex == "Female"){
+      if(cr <= 0.7){
+        gfr <- 144 * ((cr / 0.7)^(-0.329)) * (0.993^(age))
+      } else {
+        gfr <- 144 * ((cr / 0.7)^(-1.209)) * (0.993^(age))
+      }
+      
+      
+    } else {
+      if(cr <= 0.9){
+        gfr <- 141 * ((cr / 0.9)^(-0.411)) * (0.993^(age))
+      } else {
+        gfr <- 141 * ((cr / 0.9)^(-1.209)) * (0.993^(age))
+      }
+      
+      
+    }
+    
+    if (sex == "Black"){
+      gfr <- gfr * 1.159
+    }
+    
+    df[i,"GFR"] <- round(gfr)
+    
+    
+  }
+  
+  return(df)
+  
+  
+
+  
+  
+}
+
+
+
+
 
 

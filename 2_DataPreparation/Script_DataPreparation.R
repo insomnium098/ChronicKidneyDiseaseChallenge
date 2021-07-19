@@ -346,9 +346,11 @@ rm(hgb_vals, hgb_window)
 #######According to the guidelines, creatinine is probably
 ##the most important variable for the disease, as it 
 ##classifies patients in multiple groups and is used to calculate
-###the egfr
+###the GFR
 
-
+creatinine_demo <- merge(creatinine_window,
+                       demo, by = "id")
+test <- calculate_gfr(creatinine_demo)
 
 
 
