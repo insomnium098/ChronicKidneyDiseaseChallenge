@@ -346,14 +346,28 @@ rm(hgb_vals, hgb_window)
 #######According to the guidelines, creatinine is probably
 ##the most important variable for the disease, as it 
 ##classifies patients in multiple groups and is used to calculate
-###the GFR
+###the GFR. Also, albuminuria is an important factor. Further
+##in the analysis we will infer patients with albuminuria
+##by the drugs they are taking
 
 creatinine_demo <- merge(creatinine_window,
                        demo, by = "id")
-test <- calculate_gfr(creatinine_demo)
+creatinine <- calculate_gfr(creatinine_demo)
 
+##We will also clasiffy the patients in 5 categories
+##depending on their GFR
+creatinine <- gfr_classify(creatinine)
 
+#Rapid progression is defined as a sustained decline in 
+#eGFR of more than 5 ml/min/1.73 m2 per yr.
+#Thus, we will calculate the change of GFR for each 3 windows per
+#patient
+creatinine <- gfr_evolution(creatinine)
+creatinine <- subset(creatinine, select = -c(race, gender, age))
+creatinine <- dummy_columns(creatinine,select_columns = c("gfr_class"),
+                     remove_selected_columns  = TRUE)
 
+rm(creatinine_window)
 
 
 

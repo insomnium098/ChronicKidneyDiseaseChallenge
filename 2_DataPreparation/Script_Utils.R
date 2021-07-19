@@ -298,6 +298,98 @@ calculate_gfr <- function(df){
 
 
 
+###Function to classify patients depending on their GFR 
+##It receives a creatinine GFR dataframe and returns it with
+##the gfr_class column
+##GFR >= 90 = G1
+##GFR 60-89 = G2
+##GFR 45-59 = G3a
+##GFR 30-44 = G3b
+##GFR 16-29 = G4
+##GFR <= 15 = G5
+
+
+gfr_classify <- function(df){
+  df$gfr_class <- 0
+  for (i in 1:nrow(df)){
+    gfr <- df[i,"GFR"]
+    if (gfr >= 90 ){
+      df[i,"gfr_class"] <- "G1"
+    } else if (between(gfr, 60, 89)){
+      df[i,"gfr_class"] <- "G2"
+    } else if (between(gfr, 45, 59)){
+      df[i,"gfr_class"] <- "G3a"
+    } else if (between(gfr, 30, 44)){
+      df[i,"gfr_class"] <- "G3b"
+    } else if (between(gfr, 16, 29)){
+      df[i,"gfr_class"] <- "G4"
+    } else {
+      df[i,"gfr_class"] <- "G5"
+    }
+    
+  }
+  
+  return(df)
+    
+
+}
+
+
+##Function to calculate the GFR by 3 window units
+
+gfr_evolution <- function(df){
+  
+  ##First we will filter by patient
+  for (patient in unique(df$id)){
+    df_filt1 <- filter(df, id == patient)
+    df_filt1$gfr_evolution <- -1
+    
+    #For each patient we will iterate over all of its windows
+    counter <- 0
+    for (window in 1:nrow(df_filt1)){
+      
+      currentGFR <- df_filt1[window,"GFR"]
+      ##Base case
+      if(window == 1){
+        df_filt1[window,"gfr_evolution"] <- 0
+        counter <- counter + 1
+        
+      } else if (window < 3 & window != 1) {
+        df_filt1[window,"gfr_evolution"] <- currentGFR -
+          df_filt1[window-1,"GFR"]
+        counter <- counter + 1
+        
+      } else {
+        df_filt1[window,"gfr_evolution"] <- currentGFR - 
+          mean(df_filt1[tail(1:window,4)[1:3],"GFR"])
+        counter = counter + 1
+        
+        
+      }
+      
+    }
+    
+    if(!exists("df_patient")){
+      df_patient <- df_filt1
+    } else {
+      df_patient <- rbind(df_patient, df_filt1)
+    }
+    
+  }
+  
+  return(df_patient)
+  
+  
+}
+
+
+test <- gfr_evolution(creatinine)
+
+
+
+
+
+
 
 
 
