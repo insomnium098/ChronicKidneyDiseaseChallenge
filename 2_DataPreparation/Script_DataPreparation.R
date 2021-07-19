@@ -369,6 +369,55 @@ creatinine <- dummy_columns(creatinine,select_columns = c("gfr_class"),
 
 rm(creatinine_window)
 
+###Demo
+demo <- dummy_columns(demo,select_columns = c("race", "gender"),
+                      remove_selected_columns  = TRUE)
+
+##response
+##0 not progressed, 1 progressed
+response$Stage_Progress <- gsub("False",0,response$Stage_Progress,
+                                fixed = TRUE)
+response$Stage_Progress <- gsub("True",1,response$Stage_Progress,
+                                fixed = TRUE)
+
+
+
+
+#####Finally we will merge the glucose, hgb,bp, ldl, creatinine,
+##demo, meds and response
+hgb <- subset(hgb, select = -c(time, window))
+creatinine <- subset(creatinine, select = -c(time, window))
+
+
+
+finalDF <- merge(glucose_window, hgb,
+                 by = c("id", "Window"))
+
+finalDF <- merge(finalDF, bp,
+                 by = c("id", "Window"))
+
+finalDF <- merge(finalDF, ldl,
+                 by = c("id", "Window"))
+
+finalDF <- merge(finalDF, creatinine,
+                 by = c("id", "Window"))
+
+finalDF <- merge(finalDF, demo,
+                 by = c("id"))
+
+finalDF <- merge(finalDF, meds_window,
+                 by = c("id", "Window"))
+
+finalDF <- merge(finalDF, response,
+                 by = c("id"))
+
+write.csv(finalDF, "DataPrepared.csv", row.names = FALSE)
+
+
+
+
+
+
 
 
 
