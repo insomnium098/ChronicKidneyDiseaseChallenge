@@ -197,4 +197,49 @@ ldl_class <- function(df){
 }
 
 
+###Function to classify patients depending their HGB values
+###Normal values:
+###Womans: 	12.3 - 15.3  g/dL
+###Mans: 14.0 - 17.5 g/dL
+##Returns a dataframe with the hgb_class value
+
+hgb_class <- function(df){
+  df$hgb_class <- 0
+  
+  for (i in 1:nrow(df)){
+    hgb <- df[i,"hgb_value"]
+    sex <- df[i,"gender"]
+    
+    if(sex == "Male"){
+      if (hgb < 14.0){
+        df[i,"hgb_class"] <- "Low"
+      } else if (hgb > 17.5){
+        df[i,"hgb_class"] <- "High"
+      } else {
+        df[i,"hgb_class"] <- "Normal"
+      }
+      
+    } else {
+      #Female case
+      if (hgb < 12.3){
+        df[i,"hgb_class"] <- "Low"
+      } else if (hgb > 15.3){
+        df[i,"hgb_class"] <- "High"
+      } else {
+        df[i,"hgb_class"] <- "Normal"
+      }
+    }
+    
+  }
+  
+  return(df)
+  
+  
+  
+  
+}
+
+
+
+
 

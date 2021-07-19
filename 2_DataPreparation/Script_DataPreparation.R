@@ -321,6 +321,34 @@ ldl <- dummy_columns(ldl,select_columns = c("LDL_class"),
                     remove_selected_columns  = TRUE)
 rm(ldl_window)
 
+######HGB
+###The value of hemoglobin is used to measure if the patient
+###in anemic. Due to the range of the values, we will assume
+###that the units are in g/dL
+###Normal values:
+###Womans: 	12.3 - 15.3  g/dL
+###Mans: 14.0 - 17.5 g/dL
+
+hgb_vals <- merge(hgb_window, demo,
+                  by = "id")
+hgb <- hgb_class(hgb_vals)
+
+
+hgb<- subset(hgb, select = -c(race, gender, age))
+hgb <- dummy_columns(hgb,select_columns = c("hgb_class"),
+                     remove_selected_columns  = TRUE)
+
+rm(hgb_vals, hgb_window)
+
+
+
+#######Creatinine
+#######According to the guidelines, creatinine is probably
+##the most important variable for the disease, as it 
+##classifies patients in multiple groups and is used to calculate
+###the egfr
+
+
 
 
 
