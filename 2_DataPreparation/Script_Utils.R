@@ -383,7 +383,7 @@ gfr_evolution <- function(df){
 }
 
 
-test <- gfr_evolution(creatinine)
+#test <- gfr_evolution(creatinine)
 
 
 

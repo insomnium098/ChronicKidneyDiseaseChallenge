@@ -59,7 +59,7 @@ for (i in unique(df_patients$id)){
 rm(df_patients, max_pat_df)
 
 
-###We will process each dataset, making a time window of 30 days
+###We will process each dataset, making a time window of N days
 ###for each patient
 
 ############WINDOW PROCESSING FOR MEDS
@@ -68,10 +68,12 @@ rm(df_patients, max_pat_df)
 ##that they were receiving the drugs before the diagnosis of CDK
 meds$durationDose <- abs(meds$end_day - meds$start_day)
 
-window <- 30
+window <- 180
 
 ###By iterating all ids to 300 we will take care of patients
 ###With no drugs
+message("Processing Meds")
+
 for (i in 0:max(df_patient_maxTime$id)){ 
   message(i)
   ##First we obtain the patient drugs data
@@ -215,24 +217,36 @@ meds_window[is.na(meds_window)] <- 0
 ##As with the meds, we will make the df of creatinine by windows
 ##Since the rest of the dfs share the same structure, we will make
 ##a generic function to make a dataframe by window
-creatinine_window <- makeWindows(30, creatinine, df_patient_maxTime)
+message("Processing Creatinine")
+
+creatinine_window <- makeWindows(window, creatinine, df_patient_maxTime)
 colnames(creatinine_window)[2] <- "creatinine_value"
 
 ################DBP
-dbp_window <- makeWindows(30, dbp, df_patient_maxTime)
+message("Processing DBP")
+
+dbp_window <- makeWindows(window, dbp, df_patient_maxTime)
 colnames(dbp_window)[2] <- "dbp_value"
 ################Glucose
-glucose_window <- makeWindows(30, glucose, df_patient_maxTime)
+message("Processing Glucose")
+
+glucose_window <- makeWindows(window, glucose, df_patient_maxTime)
 colnames(glucose_window)[2] <- "glucose_value"
 ################HGB
-hgb_window <- makeWindows(30, hgb, df_patient_maxTime)
+message("Processing HGB")
+
+hgb_window <- makeWindows(window, hgb, df_patient_maxTime)
 colnames(hgb_window)[2] <- "hgb_value"
 ################LDL
-ldl_window <- makeWindows(30, ldl, df_patient_maxTime)
+message("Processing LDL")
+
+ldl_window <- makeWindows(window, ldl, df_patient_maxTime)
 colnames(ldl_window)[2] <- "ldl_value"
 
 ################SBP
-sbp_window <- makeWindows(30, sbp, df_patient_maxTime)
+message("Processing SBP")
+
+sbp_window <- makeWindows(window, sbp, df_patient_maxTime)
 colnames(sbp_window)[2] <- "sbp_value"
 
 
@@ -288,6 +302,8 @@ bp_window <- merge(sbp_window, dbp_window,
 
 rm(dbp_window, sbp_window)
 
+message("BP Clasifier")
+
 bp <- bp_classifier(bp_window)
 rm(bp_window)
 ##We will also calculate the difference between normal levels
@@ -312,7 +328,7 @@ bp <- dummy_columns(bp,select_columns = c("bp_class",
 ##130-159mg/dl : BorderlineHigh
 ##160-189mg/dl : High (Hypercholesterolemia)
 ##190mg/dL : VeryHigh
-
+message("LDL Clasifier")
 ldl <- ldl_class(ldl_window)
 ldl <- subset(ldl, select = -c(time))
 #We also add how much patients LDL levels differ from normal
@@ -328,7 +344,7 @@ rm(ldl_window)
 ###Normal values:
 ###Womans: 	12.3 - 15.3  g/dL
 ###Mans: 14.0 - 17.5 g/dL
-
+message("HGB Clasifier")
 hgb_vals <- merge(hgb_window, demo,
                   by = "id")
 hgb <- hgb_class(hgb_vals)
@@ -349,19 +365,21 @@ rm(hgb_vals, hgb_window)
 ###the GFR. Also, albuminuria is an important factor. Further
 ##in the analysis we will infer patients with albuminuria
 ##by the drugs they are taking
-
+message("GFR Calculation")
 creatinine_demo <- merge(creatinine_window,
                        demo, by = "id")
 creatinine <- calculate_gfr(creatinine_demo)
 
 ##We will also clasiffy the patients in 5 categories
 ##depending on their GFR
+message("GFR Clasifier")
 creatinine <- gfr_classify(creatinine)
 
 #Rapid progression is defined as a sustained decline in 
 #eGFR of more than 5 ml/min/1.73 m2 per yr.
 #Thus, we will calculate the change of GFR for each 3 windows per
 #patient
+message("GFR Evolution")
 creatinine <- gfr_evolution(creatinine)
 creatinine <- subset(creatinine, select = -c(race, gender, age))
 creatinine <- dummy_columns(creatinine,select_columns = c("gfr_class"),
@@ -411,7 +429,10 @@ finalDF <- merge(finalDF, meds_window,
 finalDF <- merge(finalDF, response,
                  by = c("id"))
 
-write.csv(finalDF, "DataPrepared.csv", row.names = FALSE)
+nameOutput <- paste0("DataPrepared_", window,".csv")
+
+message("Writing Final CSV")
+write.csv(finalDF, nameOutput, row.names = FALSE)
 
 
 
