@@ -68,7 +68,7 @@ rm(df_patients, max_pat_df)
 ##that they were receiving the drugs before the diagnosis of CDK
 meds$durationDose <- abs(meds$end_day - meds$start_day)
 
-window <- 180
+window <- 120
 
 ###By iterating all ids to 300 we will take care of patients
 ###With no drugs
