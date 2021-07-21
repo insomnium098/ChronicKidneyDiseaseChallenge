@@ -385,6 +385,18 @@ gfr_evolution <- function(df){
 
 #test <- gfr_evolution(creatinine)
 
+###Function to obtain the time difference between evaluations
+
+eval_times <- function(df){
+  df <- setDT(df)
+  
+  dfDiff <- df[, diff := time - shift(time),
+                         by = id]
+  dfDiff[is.na(dfDiff)] <- 0
+  
+  return(dfDiff)
+}
+
 
 
 
